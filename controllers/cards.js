@@ -32,7 +32,12 @@ module.exports.deleteCard = (req, res) => {
       }
       return res.send(card);
     })
-    .catch((err) => res.status(INTERNAL_SERVER_ERROR).send({ message: `Произошла ошибка на сервере. Текст ошибки: ${err}` }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(BAD_REQUEST).send({ message: `Передан некорректный _id для удаления карточки. Текст ошибки: ${err.message}` });
+      }
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: `Произошла ошибка на сервере. Текст ошибки: ${err.message}` });
+    });
 };
 
 module.exports.likeCard = (req, res) => {
