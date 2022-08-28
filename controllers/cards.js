@@ -1,12 +1,13 @@
 const Card = require('../models/card');
 
-const badReq = 400;
-const defaultError = 500;
+const BAD_REQUEST = 400;
+const NOT_FOUND = 404;
+const INTERNAL_SERVER_ERROR = 500;
 
 module.exports.getCard = (req, res) => {
   Card.find({})
     .then((card) => res.send(card))
-    .catch((err) => res.status(defaultError).send({ message: `Произошла ошибка на сервере. Текст ошибки: ${err}` }));
+    .catch((err) => res.status(INTERNAL_SERVER_ERROR).send({ message: `Произошла ошибка на сервере. Текст ошибки: ${err}` }));
 };
 
 module.exports.addCard = (req, res) => {
@@ -14,14 +15,24 @@ module.exports.addCard = (req, res) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner })
     .then((card) => res.send(card))
-    .catch((err) => res.status(badReq).send({ message: `Переданы некорректные данные. Текст ошибки: ${err}` }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(BAD_REQUEST).send({ message: `Переданы некорректные данные при создании карточки. Текст ошибки: ${err.message}` });
+      }
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: `Произошла ошибка на сервере. Текст ошибки: ${err.message}` });
+    });
 };
 
 module.exports.deleteCard = (req, res) => {
   const { cardId } = req.params;
   Card.findByIdAndRemove(cardId)
-    .then((card) => res.send(card))
-    .catch((err) => res.status(badReq).send({ message: `Переданы некорректные данные. Текст ошибки: ${err}` }));
+    .then((card) => {
+      if (!card) {
+        return res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
+      }
+      return res.send(card);
+    })
+    .catch((err) => res.status(INTERNAL_SERVER_ERROR).send({ message: `Произошла ошибка на сервере. Текст ошибки: ${err}` }));
 };
 
 module.exports.likeCard = (req, res) => {
@@ -30,8 +41,18 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => res.send(card))
-    .catch((err) => res.status(defaultError).send({ message: `Произошла ошибка на сервере. Текст ошибки: ${err}` }));
+    .then((card) => {
+      if (!card) {
+        return res.status(NOT_FOUND).send({ message: 'Передан несуществующий _id карточки.' });
+      }
+      return res.send(card);
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(BAD_REQUEST).send({ message: `Переданы некорректные данные для постановки лайка. Текст ошибки: ${err.message}` });
+      }
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: `Произошла ошибка на сервере. Текст ошибки: ${err.message}` });
+    });
 };
 
 module.exports.dilikeCard = (req, res) => {
@@ -40,6 +61,16 @@ module.exports.dilikeCard = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => res.send(card))
-    .catch((err) => res.status(defaultError).send({ message: `Произошла ошибка на сервере. Текст ошибки: ${err}` }));
+    .then((card) => {
+      if (!card) {
+        return res.status(NOT_FOUND).send({ message: 'Передан несуществующий _id карточки.' });
+      }
+      return res.send(card);
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(BAD_REQUEST).send({ message: `Переданы некорректные данные для снятия лайка. Текст ошибки: ${err.message}` });
+      }
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: `Произошла ошибка на сервере. Текст ошибки: ${err.message}` });
+    });
 };
