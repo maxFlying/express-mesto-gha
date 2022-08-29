@@ -10,8 +10,6 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: false,
 });
 
-app.listen(PORT);
-
 app.use((req, res, next) => {
   req.user = {
     _id: '630b56d6bddd897cd84d4847',
@@ -29,3 +27,5 @@ app.use('/', require('./routes/cards'));
 app.use('*', (req, res) => {
   res.status(NOT_FOUND).send({ message: 'Запрашиваемый путь не существует' });
 });
+
+app.listen(PORT);
