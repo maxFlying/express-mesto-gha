@@ -5,7 +5,6 @@ const cookieParser = require('cookie-parser');
 
 const { PORT = 3000 } = process.env;
 const NOT_FOUND = 404;
-const INTERNAL_SERVER_ERROR = 500;
 const app = express();
 const { celebrate, Joi } = require('celebrate');
 const { addUser, login } = require('./controllers/users');
@@ -48,7 +47,8 @@ app.use('*', (req, res) => {
 });
 
 app.use((err, req, res, next) => {
-  res.status(INTERNAL_SERVER_ERROR).send({ message: `Произошла ошибка на сервере. Текст ошибки: ${err.message}` });
+  const { statusCode = 500, message } = err;
+  res.status(statusCode).send({ message: statusCode === 500 ? 'Произошла ошибка на сервере' : `Ошибка: ${message}` });
   next();
 });
 
