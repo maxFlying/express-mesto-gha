@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const validator = require('validator');
 const UnauthorizedError = require('../errors/unauthorized-err');
 
 const userSchema = new mongoose.Schema({
@@ -8,6 +9,7 @@ const userSchema = new mongoose.Schema({
     minlength: 2,
     maxlength: 30,
     default: 'Жак-Ив Кусто',
+    validate: validator.isEmail,
   },
   about: {
     type: String,

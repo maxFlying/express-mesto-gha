@@ -2,6 +2,7 @@ const Card = require('../models/card');
 
 const BadRequestError = require('../errors/bad-req-err');
 const NotFoundError = require('../errors/not-found-err');
+const ForbiddenError = require('../errors/forbidden-err');
 
 module.exports.getCard = (req, res, next) => {
   Card.find({})
@@ -32,20 +33,21 @@ module.exports.deleteCard = (req, res, next) => {
         throw new NotFoundError('Карточка с указанным _id не найдена.');
       }
       if (ownerId !== id) {
-        throw new BadRequestError('Карточка не ваша, Вы не можете ее удалить');
+        throw new ForbiddenError('Карточка не ваша, Вы не можете ее удалить');
       } else {
         Card.findByIdAndRemove(cardId)
           .then((removedCard) => {
             res.send(removedCard);
+          })
+          .catch((err) => {
+            if (err.name === 'CastError') {
+              return next(new BadRequestError(`Передан некорректный _id для удаления карточки. ${err.message}`));
+            }
+            return next(err);
           });
       }
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return next(new BadRequestError(`Передан некорректный _id для удаления карточки. ${err.message}`));
-      }
-      return next(err);
-    });
+    .catch(next);
 };
 
 module.exports.likeCard = (req, res, next) => {
