@@ -39,7 +39,9 @@ module.exports.deleteCard = (req, res, next) => {
           .then((removedCard) => {
             res.send(removedCard);
           })
-          .catch(next);
+          .catch((err) => {
+            res.send(err);
+          });
       }
     })
     .catch(next);
