@@ -39,12 +39,7 @@ module.exports.deleteCard = (req, res, next) => {
           .then((removedCard) => {
             res.send(removedCard);
           })
-          .catch((err) => {
-            if (err.name === 'CastError') {
-              return next(new BadRequestError(`Передан некорректный _id для удаления карточки. ${err.message}`));
-            }
-            return next(err);
-          });
+          .catch(next);
       }
     })
     .catch(next);

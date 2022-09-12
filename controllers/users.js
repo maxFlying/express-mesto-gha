@@ -21,12 +21,7 @@ module.exports.getUserById = (req, res, next) => {
       }
       return res.send(user);
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return next(new BadRequestError(`Некорректный _id: ${err.message}`));
-      }
-      return next(err);
-    });
+    .catch(next);
 };
 
 module.exports.addUser = (req, res, next) => {
@@ -78,7 +73,8 @@ module.exports.editProfile = (req, res, next) => {
         return next(new BadRequestError(`Переданы некорректные данные при обновлении профиля. Текст ошибки: ${err.message}`));
       }
       return next(err);
-    });
+    })
+    .catch(next);
 };
 
 module.exports.editAvatar = (req, res, next) => {

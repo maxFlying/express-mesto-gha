@@ -18,7 +18,7 @@ router.get('/users/:userId', celebrate({
 router.patch('/users/me', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required().min(2).max(30),
+    about: Joi.string().required().min(2).max(30),
   }),
 }), editProfile);
 router.patch('/users/me/avatar', celebrate({
