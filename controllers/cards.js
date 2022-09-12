@@ -37,7 +37,10 @@ module.exports.deleteCard = (req, res, next) => {
       } else {
         Card.findByIdAndRemove(cardId)
           .then((removedCard) => {
-            res.send(removedCard);
+            if (!cardId) {
+              throw new NotFoundError('Карточка с указанным _id не найдена.');
+            }
+            return res.send(removedCard);
           })
           .catch(next);
       }
