@@ -16,12 +16,17 @@ module.exports.getUserById = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
     .then((user) => {
-      res.send(user);
+      if (!user) {
+        throw new NotFoundError('Пользователь по указанному _id не найден');
+      }
+      return res.send(user);
     })
     .catch((err) => {
-      res.send(err);
-    })
-    .catch(next);
+      if (err.name === 'CastError') {
+        return next(new BadRequestError(`Некорректный _id: ${err.message}`));
+      }
+      return next(err);
+    });
 };
 
 module.exports.addUser = (req, res, next) => {
