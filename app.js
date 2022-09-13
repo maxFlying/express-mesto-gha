@@ -4,9 +4,9 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 
 const { PORT = 3000 } = process.env;
-const NOT_FOUND = 404;
 const app = express();
 const { celebrate, Joi, errors } = require('celebrate');
+const NotFoundError = require('./errors/not-found-err');
 const { addUser, login } = require('./controllers/users');
 const { auth } = require('./middlewares/auth');
 
@@ -44,8 +44,8 @@ app.use('/', require('./routes/cards'));
 
 app.use(errors());
 
-app.use('*', (req, res) => {
-  res.status(NOT_FOUND).send({ message: 'Запрашиваемый путь не существует' });
+app.use('*', (req, res, next) => {
+  next(new NotFoundError('Запрашиваемый путь не существует.'));
 });
 
 app.use((err, req, res, next) => {

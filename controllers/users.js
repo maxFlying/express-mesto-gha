@@ -78,8 +78,7 @@ module.exports.editProfile = (req, res, next) => {
         return next(new BadRequestError(`Переданы некорректные данные при обновлении профиля. Текст ошибки: ${err.message}`));
       }
       return next(err);
-    })
-    .catch(next);
+    });
 };
 
 module.exports.editAvatar = (req, res, next) => {
